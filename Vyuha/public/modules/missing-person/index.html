@@ -1,0 +1,365 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>VYUHA · Missing Person</title>
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;400;500;600;700&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+:root{--bg:#060810;--bg2:#0a0d18;--surface:rgba(255,255,255,.04);--border:rgba(62,207,255,.12);--accent:#3ecfff;--gold:#c8a96e;--green:#00e5a0;--red:#ff3b55;--text:#e8eeff;--muted:rgba(232,238,255,.45)}
+::-webkit-scrollbar{width:3px}::-webkit-scrollbar-thumb{background:var(--accent);border-radius:2px}
+body{background:var(--bg);color:var(--text);font-family:'Space Grotesk',sans-serif;min-height:100vh}
+body::before{content:'';position:fixed;width:600px;height:600px;background:rgba(62,207,255,.05);border-radius:50%;filter:blur(120px);top:-200px;left:-150px;z-index:0;pointer-events:none}
+
+/* TOPBAR */
+.topbar{position:fixed;top:0;left:0;right:0;display:flex;align-items:center;justify-content:space-between;padding:1rem 2rem;z-index:100;background:rgba(6,8,16,.88);backdrop-filter:blur(16px);border-bottom:1px solid var(--border)}
+.top-brand{font-size:1.1rem;font-weight:700;letter-spacing:.2em;color:var(--gold);text-decoration:none}
+.top-tag{font-size:.62rem;letter-spacing:.15em;text-transform:uppercase;color:var(--accent);padding:.22rem .7rem;border-radius:20px;background:rgba(62,207,255,.1);border:1px solid rgba(62,207,255,.2)}
+.back-btn{font-size:.7rem;letter-spacing:.1em;text-transform:uppercase;color:var(--muted);text-decoration:none;padding:.32rem .8rem;border-radius:6px;border:1px solid var(--border);transition:all .25s}
+.back-btn:hover{color:var(--text);border-color:rgba(62,207,255,.4)}
+
+/* LAYOUT */
+main{padding:80px 1.5rem 3rem;max-width:1100px;margin:0 auto;position:relative;z-index:1}
+h1{font-size:clamp(1.8rem,4vw,2.8rem);font-weight:700;text-align:center;margin-bottom:.4rem;background:linear-gradient(135deg,#fff 0%,var(--accent) 100%);-webkit-background-clip:text;-webkit-text-fill-color:transparent}
+.subtitle{font-size:.88rem;color:var(--muted);text-align:center;margin-bottom:2.5rem}
+
+/* TABS */
+.tabs{display:flex;gap:.5rem;justify-content:center;margin-bottom:2.5rem}
+.tab{padding:.6rem 1.8rem;border-radius:8px;font-size:.8rem;font-weight:600;letter-spacing:.08em;text-transform:uppercase;cursor:pointer;border:1px solid var(--border);background:transparent;color:var(--muted);transition:all .25s;font-family:'Space Grotesk',sans-serif}
+.tab.active{background:var(--accent);color:#060810;border-color:var(--accent)}
+.tab:hover:not(.active){border-color:var(--accent);color:var(--accent)}
+
+/* PANELS */
+.panel{display:none}
+.panel.active{display:block}
+
+/* FORM */
+.form-card{background:var(--surface);border:1px solid var(--border);border-radius:16px;padding:2rem;backdrop-filter:blur(12px);max-width:680px;margin:0 auto}
+.form-grid{display:grid;grid-template-columns:1fr 1fr;gap:1rem}
+.form-group{display:flex;flex-direction:column;gap:.4rem}
+.form-group.full{grid-column:span 2}
+label{font-size:.7rem;letter-spacing:.12em;text-transform:uppercase;color:var(--muted)}
+input,select,textarea{background:rgba(255,255,255,.05);border:1px solid var(--border);border-radius:8px;padding:.7rem 1rem;color:var(--text);font-size:.88rem;font-family:'Space Grotesk',sans-serif;outline:none;transition:border-color .25s;width:100%}
+input::placeholder,textarea::placeholder{color:rgba(232,238,255,.2)}
+input:focus,select:focus,textarea:focus{border-color:var(--accent)}
+select option{background:#0a0d18;color:var(--text)}
+textarea{resize:vertical;min-height:90px}
+
+/* PHOTO UPLOAD */
+.photo-upload{border:2px dashed var(--border);border-radius:10px;padding:2rem;text-align:center;cursor:pointer;transition:all .25s;position:relative;overflow:hidden}
+.photo-upload:hover{border-color:var(--accent);background:rgba(62,207,255,.04)}
+.photo-upload input{position:absolute;inset:0;opacity:0;cursor:pointer}
+.photo-upload-icon{font-size:2rem;margin-bottom:.5rem}
+.photo-upload-txt{font-size:.8rem;color:var(--muted)}
+.photo-upload-txt span{color:var(--accent)}
+#photoPreview{width:100%;max-height:180px;object-fit:cover;border-radius:8px;margin-top:.8rem;display:none}
+
+/* SUBMIT BTN */
+.submit-btn{width:100%;padding:.9rem;border-radius:10px;background:var(--accent);border:none;color:#060810;font-size:.9rem;font-weight:700;letter-spacing:.1em;text-transform:uppercase;cursor:pointer;transition:all .3s;margin-top:1.2rem;font-family:'Space Grotesk',sans-serif}
+.submit-btn:hover{background:#5dd8ff;transform:translateY(-2px)}
+.submit-btn:disabled{opacity:.5;cursor:default;transform:none}
+
+/* TOAST */
+.toast{position:fixed;bottom:2rem;right:2rem;padding:.9rem 1.4rem;border-radius:10px;font-size:.85rem;font-weight:600;z-index:9999;transform:translateY(100px);opacity:0;transition:all .4s;max-width:320px}
+.toast.success{background:rgba(0,229,160,.15);border:1px solid rgba(0,229,160,.3);color:var(--green)}
+.toast.error{background:rgba(255,59,85,.15);border:1px solid rgba(255,59,85,.3);color:var(--red)}
+.toast.show{transform:translateY(0);opacity:1}
+
+/* SEARCH */
+.search-bar{display:flex;gap:.7rem;max-width:680px;margin:0 auto 2rem}
+.search-input{flex:1;background:var(--surface);border:1px solid var(--border);border-radius:10px;padding:.75rem 1.1rem;color:var(--text);font-size:.88rem;font-family:'Space Grotesk',sans-serif;outline:none;transition:border-color .25s}
+.search-input:focus{border-color:var(--accent)}
+.search-input::placeholder{color:rgba(232,238,255,.2)}
+.search-btn{padding:.75rem 1.4rem;border-radius:10px;background:var(--accent);border:none;color:#060810;font-weight:700;font-size:.82rem;cursor:pointer;transition:all .25s;font-family:'Space Grotesk',sans-serif;white-space:nowrap}
+.search-btn:hover{background:#5dd8ff}
+
+/* CARDS GRID */
+.cards-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(280px,1fr));gap:1.2rem;max-width:1000px;margin:0 auto}
+.person-card{background:var(--surface);border:1px solid var(--border);border-radius:14px;overflow:hidden;transition:all .3s;cursor:default}
+.person-card:hover{border-color:var(--accent);transform:translateY(-4px);box-shadow:0 16px 48px rgba(62,207,255,.1)}
+.card-photo{width:100%;height:200px;object-fit:cover;background:rgba(255,255,255,.04);display:flex;align-items:center;justify-content:center;font-size:4rem;color:rgba(232,238,255,.1)}
+.card-photo img{width:100%;height:200px;object-fit:cover}
+.card-body{padding:1.2rem}
+.card-name{font-size:1.05rem;font-weight:700;margin-bottom:.3rem}
+.card-meta{font-size:.75rem;color:var(--muted);font-family:'DM Mono',monospace;line-height:1.7}
+.card-status{display:inline-block;margin-top:.6rem;padding:.22rem .65rem;border-radius:20px;font-size:.62rem;font-weight:600;letter-spacing:.08em;text-transform:uppercase}
+.status-missing{background:rgba(255,59,85,.12);color:var(--red);border:1px solid rgba(255,59,85,.25)}
+.status-found{background:rgba(0,229,160,.12);color:var(--green);border:1px solid rgba(0,229,160,.25)}
+.card-date{font-size:.65rem;color:rgba(232,238,255,.25);margin-top:.5rem;font-family:'DM Mono',monospace}
+
+/* LOADING / EMPTY */
+.loading{text-align:center;padding:3rem;color:var(--muted);font-size:.88rem}
+.spinner{width:36px;height:36px;border:3px solid var(--border);border-top-color:var(--accent);border-radius:50%;animation:spin .7s linear infinite;margin:0 auto 1rem}
+@keyframes spin{to{transform:rotate(360deg)}}
+.empty{text-align:center;padding:3rem;color:var(--muted)}
+.empty-icon{font-size:3rem;margin-bottom:1rem;opacity:.4}
+
+@media(max-width:600px){
+  .form-grid{grid-template-columns:1fr}
+  .form-group.full{grid-column:span 1}
+  .topbar{padding:.8rem 1rem}
+  .search-bar{flex-direction:column}
+}
+</style>
+</head>
+<body>
+
+<header class="topbar">
+  <a class="top-brand" href="/">VYUHA</a>
+  <span class="top-tag">🔍 Missing Person</span>
+  <a class="back-btn" href="/">← Back</a>
+</header>
+
+<main>
+  <h1>Missing Person Registry</h1>
+  <p class="subtitle">Report a missing person or search existing reports</p>
+
+  <div class="tabs">
+    <button class="tab active" onclick="switchTab('report')">📋 Report Missing</button>
+    <button class="tab" onclick="switchTab('search')">🔍 Search Reports</button>
+  </div>
+
+  <!-- REPORT PANEL -->
+  <div class="panel active" id="panel-report">
+    <div class="form-card">
+      <div class="form-grid">
+
+        <div class="form-group">
+          <label>Full Name *</label>
+          <input type="text" id="f-name" placeholder="e.g. Ravi Kumar" required/>
+        </div>
+
+        <div class="form-group">
+          <label>Age *</label>
+          <input type="number" id="f-age" placeholder="e.g. 34" min="1" max="120"/>
+        </div>
+
+        <div class="form-group">
+          <label>Gender</label>
+          <select id="f-gender">
+            <option value="">Select gender</option>
+            <option>Male</option>
+            <option>Female</option>
+            <option>Other</option>
+          </select>
+        </div>
+
+        <div class="form-group">
+          <label>Last Seen Date *</label>
+          <input type="date" id="f-date"/>
+        </div>
+
+        <div class="form-group full">
+          <label>Last Known Location *</label>
+          <input type="text" id="f-location" placeholder="e.g. Near Visakhapatnam Railway Station"/>
+        </div>
+
+        <div class="form-group full">
+          <label>Physical Description</label>
+          <textarea id="f-description" placeholder="Height, build, skin tone, hair, distinguishing marks, clothing last worn…"></textarea>
+        </div>
+
+        <div class="form-group">
+          <label>Contact Name *</label>
+          <input type="text" id="f-contact-name" placeholder="Your name"/>
+        </div>
+
+        <div class="form-group">
+          <label>Contact Phone *</label>
+          <input type="tel" id="f-contact-phone" placeholder="+91 XXXXX XXXXX"/>
+        </div>
+
+        <div class="form-group full">
+          <label>Upload Photo</label>
+          <div class="photo-upload">
+            <input type="file" id="f-photo" accept="image/*" onchange="previewPhoto(this)"/>
+            <div class="photo-upload-icon">📷</div>
+            <div class="photo-upload-txt">Click to upload or drag photo here<br><span>JPG, PNG up to 5MB</span></div>
+            <img id="photoPreview" alt="Preview"/>
+          </div>
+        </div>
+
+      </div>
+      <button class="submit-btn" id="submitBtn" onclick="submitReport()">Submit Report</button>
+    </div>
+  </div>
+
+  <!-- SEARCH PANEL -->
+  <div class="panel" id="panel-search">
+    <div class="search-bar">
+      <input class="search-input" id="searchInput" type="text" placeholder="Search by name or location…" oninput="filterCards()"/>
+      <button class="search-btn" onclick="loadReports()">🔄 Refresh</button>
+    </div>
+    <div class="cards-grid" id="cardsGrid">
+      <div class="loading" style="grid-column:1/-1"><div class="spinner"></div>Loading reports…</div>
+    </div>
+  </div>
+</main>
+
+<div class="toast" id="toast"></div>
+
+<!-- Firebase SDKs -->
+<script type="module">
+import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
+import { getFirestore, collection, addDoc, getDocs, query, orderBy, serverTimestamp }
+  from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
+import { getStorage, ref, uploadBytes, getDownloadURL }
+  from "https://www.gstatic.com/firebasejs/10.12.2/firebase-storage.js";
+
+const firebaseConfig = {
+  apiKey: "AIzaSyAucVwExoz9Yk7GuM1wgpZ5Q_3V0CLFBjI",
+  authDomain: "vyuha-missing-person.firebaseapp.com",
+  projectId: "vyuha-missing-person",
+  storageBucket: "vyuha-missing-person.firebasestorage.app",
+  appId: "1:578647417734:web:900a0c2eefcdd4a135c207"
+};
+
+const app = initializeApp(firebaseConfig);
+const db  = getFirestore(app);
+const storage = getStorage(app);
+
+// ── TOAST
+function toast(msg, type='success'){
+  const el = document.getElementById('toast');
+  el.textContent = msg;
+  el.className = `toast ${type} show`;
+  setTimeout(()=> el.classList.remove('show'), 3500);
+}
+
+// ── PHOTO PREVIEW
+window.previewPhoto = (input) => {
+  const prev = document.getElementById('photoPreview');
+  if (input.files && input.files[0]) {
+    const reader = new FileReader();
+    reader.onload = e => { prev.src = e.target.result; prev.style.display = 'block'; };
+    reader.readAsDataURL(input.files[0]);
+  }
+};
+
+// ── TAB SWITCH
+window.switchTab = (tab) => {
+  document.querySelectorAll('.tab').forEach((t,i) => t.classList.toggle('active', (i===0&&tab==='report')||(i===1&&tab==='search')));
+  document.querySelectorAll('.panel').forEach(p => p.classList.remove('active'));
+  document.getElementById('panel-' + tab).classList.add('active');
+  if (tab === 'search') loadReports();
+};
+
+// ── SUBMIT REPORT
+window.submitReport = async () => {
+  const name    = document.getElementById('f-name').value.trim();
+  const age     = document.getElementById('f-age').value.trim();
+  const date    = document.getElementById('f-date').value;
+  const location= document.getElementById('f-location').value.trim();
+  const phone   = document.getElementById('f-contact-phone').value.trim();
+  const contact = document.getElementById('f-contact-name').value.trim();
+
+  if (!name)     { toast('Please enter the person\'s name', 'error'); return; }
+  if (!date)     { toast('Please enter last seen date', 'error'); return; }
+  if (!location) { toast('Please enter last known location', 'error'); return; }
+  if (!contact)  { toast('Please enter your contact name', 'error'); return; }
+  if (!phone)    { toast('Please enter a contact phone number', 'error'); return; }
+
+  const btn = document.getElementById('submitBtn');
+  btn.disabled = true;
+  btn.textContent = 'Submitting…';
+
+  try {
+    let photoURL = '';
+    const photoFile = document.getElementById('f-photo').files[0];
+    if (photoFile) {
+      const storageRef = ref(storage, `missing-persons/${Date.now()}_${photoFile.name}`);
+      const snap = await uploadBytes(storageRef, photoFile);
+      photoURL = await getDownloadURL(snap.ref);
+    }
+
+    await addDoc(collection(db, 'missing-persons'), {
+      name,
+      age:         age || 'Unknown',
+      gender:      document.getElementById('f-gender').value || 'Unknown',
+      lastSeenDate: date,
+      lastLocation: location,
+      description: document.getElementById('f-description').value.trim(),
+      contactName: contact,
+      contactPhone: phone,
+      photoURL,
+      status:      'missing',
+      reportedAt:  serverTimestamp()
+    });
+
+    toast('✅ Report submitted successfully!', 'success');
+
+    // Clear form
+    ['f-name','f-age','f-date','f-location','f-description','f-contact-name','f-contact-phone'].forEach(id => {
+      document.getElementById(id).value = '';
+    });
+    document.getElementById('f-gender').value = '';
+    document.getElementById('f-photo').value = '';
+    document.getElementById('photoPreview').style.display = 'none';
+
+  } catch (err) {
+    console.error(err);
+    toast('❌ Error: ' + err.message, 'error');
+  } finally {
+    btn.disabled = false;
+    btn.textContent = 'Submit Report';
+  }
+};
+
+// ── LOAD REPORTS
+let allReports = [];
+window.loadReports = async () => {
+  const grid = document.getElementById('cardsGrid');
+  grid.innerHTML = '<div class="loading" style="grid-column:1/-1"><div class="spinner"></div>Loading reports…</div>';
+  try {
+    const q = query(collection(db, 'missing-persons'), orderBy('reportedAt', 'desc'));
+    const snap = await getDocs(q);
+    allReports = snap.docs.map(d => ({ id: d.id, ...d.data() }));
+    renderCards(allReports);
+  } catch(err) {
+    grid.innerHTML = `<div class="empty" style="grid-column:1/-1"><div class="empty-icon">⚠️</div><p>Could not load reports: ${err.message}</p></div>`;
+  }
+};
+
+function renderCards(data) {
+  const grid = document.getElementById('cardsGrid');
+  if (!data.length) {
+    grid.innerHTML = '<div class="empty" style="grid-column:1/-1"><div class="empty-icon">🔍</div><p>No reports found.</p></div>';
+    return;
+  }
+  grid.innerHTML = data.map(r => {
+    const date = r.reportedAt?.toDate?.()?.toLocaleDateString?.() || 'Unknown date';
+    const photoHTML = r.photoURL
+      ? `<div class="card-photo"><img src="${r.photoURL}" alt="${r.name}" loading="lazy"/></div>`
+      : `<div class="card-photo">👤</div>`;
+    return `<div class="person-card">
+      ${photoHTML}
+      <div class="card-body">
+        <div class="card-name">${esc(r.name)}</div>
+        <div class="card-meta">
+          Age: ${esc(r.age)} &nbsp;·&nbsp; ${esc(r.gender || 'Unknown')}<br>
+          📍 ${esc(r.lastLocation)}<br>
+          📅 Last seen: ${esc(r.lastSeenDate)}<br>
+          📞 ${esc(r.contactName)} · ${esc(r.contactPhone)}
+        </div>
+        ${r.description ? `<div class="card-meta" style="margin-top:.5rem;opacity:.7">${esc(r.description)}</div>` : ''}
+        <span class="card-status ${r.status === 'found' ? 'status-found' : 'status-missing'}">${r.status === 'found' ? '✓ Found' : '● Missing'}</span>
+        <div class="card-date">Reported: ${date}</div>
+      </div>
+    </div>`;
+  }).join('');
+}
+
+// ── SEARCH FILTER
+window.filterCards = () => {
+  const q = document.getElementById('searchInput').value.toLowerCase();
+  const filtered = allReports.filter(r =>
+    r.name?.toLowerCase().includes(q) || r.lastLocation?.toLowerCase().includes(q)
+  );
+  renderCards(filtered);
+};
+
+function esc(s) { const d = document.createElement('div'); d.textContent = s || ''; return d.innerHTML; }
+</script>
+</body>
+</html>
